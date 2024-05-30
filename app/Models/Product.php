@@ -5,18 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
-    use HasFactory;
-    
-    public function getList() {
-        // productsテーブルからデータを取得
-        $products = DB::table('products')->get();
-
-        return $products;
-    }
-
     //　一括代入可能な属性
     protected $fillable = [
         'product_name',
@@ -37,5 +29,46 @@ class Product extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    //商品検索
+    public static function searchProducts($search, $company_id)
+    {
+        $query = self::query();
+
+        if ($search) {
+            $query->where('product_name', 'LIKE', "%{$search}%");
+        }
+
+        if ($company_id) {
+            $query->where('company_id', $company_id);
+        }
+
+        return $query->get();
+    }
+
+    //商品作成
+    public static function createProduct($data)
+    {
+        return self::create($data);
+    }
+
+    //商品更新
+    public function updateProduct($data)
+    {
+        $this->update($data);
+    }
+
+    //画像のアップロード　
+    public static function handleImageUpload($request)
+    {
+        if ($request->hasFile('img_path')) { 
+            $original = $request->img_path->getClientOriginalName();
+            $fileName = date('YmdHis') . '_' . $original;
+            $filePath = $request->img_path->storeAs('products', $fileName, 'public');
+            return '/storage/' . $filePath;
+        }
+
+        return null;
     }
 }
