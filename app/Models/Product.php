@@ -31,22 +31,6 @@ class Product extends Model
         return $this->belongsTo(Company::class);
     }
 
-    //商品検索
-    public static function searchProducts($search, $company_id)
-    {
-        $query = self::query();
-
-        if ($search) {
-            $query->where('product_name', 'LIKE', "%{$search}%");
-        }
-
-        if ($company_id) {
-            $query->where('company_id', $company_id);
-        }
-
-        return $query->get();
-    }
-
     //商品作成
     public static function createProduct($data)
     {

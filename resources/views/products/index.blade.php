@@ -9,15 +9,15 @@
     
     <!-- 検索フォームのセクション -->
     <div class="search mt-5">
-        <form action="{{ route('products.index') }}" method="GET" class="row g-3">
+        <form id="searchForm" action="{{ route('products.index') }}" method="GET" class="row g-3">
             <!-- 商品名検索用の入力欄 -->
             <div class="col-sm-12 col-md-3">
-                <input type="text" name="search" class="form-control" placeholder="検索キーワード" value="{{ request('search') }}">
+                <input type="text" id="searchQuery" name="search" class="form-control" placeholder="検索キーワード" value="{{ request('search') }}">
             </div>
 
             <!-- メーカー名検索用のセレクトボックス -->
             <div class="col-sm-12 col-md-3">
-                <select class="form-select" name="company_id">
+                <select id="companySelect" class="form-select" name="company_id">
                     <option value="" disabled selected>メーカー名</option>
                     @foreach($companies as $company)
                         <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>{{ $company->company_name }}</option>
@@ -32,8 +32,9 @@
         </form>
     </div>
 
+    <!-- 検索結果表示のセクション -->
     <div class="products mt-5">
-        <table class="table table-striped">
+        <table class="table table-striped" id="resultsTable">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -45,7 +46,7 @@
                     <th>その他</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="resultsBody">
             @foreach ($products as $product)
                 <tr>
                     <td>{{ $product->id }}</td>
@@ -69,4 +70,7 @@
         </table>
     </div>
 </div>
+<!-- JavaScriptファイルの読み込み -->
+<script src="{{ asset('js/confirmDelete.js') }}" defer></script>
+<script src="{{ asset('js/searchProducts.js') }}" defer></script>
 @endsection

@@ -22,12 +22,50 @@ class ProductController extends Controller
          $this->middleware('auth');
     }
 
-    
     public function index(Request $request)
     {
-        $products = Product::searchProducts($request->input('search'), $request->input('company_id'));
-        $companies = Company::all();
+        \Log::info('Request data:', $request->all()); //リクエストデータをログに記録
 
+        $query = Product::query();  // 新しいクエリビルダーインスタンスを作成
+
+        // 検索ワードが入力されている場合、その条件をクエリに追加
+        if ($request->filled('search')) {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        // 会社IDが指定されている場合、その条件をクエリに追加
+        if ($request->filled('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        // 関連する会社データも一緒に取得
+        $products = $query->with('company')->get();
+
+        \Log::info('Query SQL:', [$query->toSql()]); // クエリのSQLをログに記録
+        \Log::info('Query bindings:', $query->getBindings()); // クエリのバインディングをログに記録
+        \Log::info('Query result:', $products->toArray()); // クエリ結果をログに記録
+
+        if ($request->ajax()) {
+            // Ajax リクエストの場合は JSON レスポンスを返す
+            return response()->json($products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'img_path' => asset($product->img_path),
+                    'product_name' => $product->product_name,
+                    'price' => $product->price,
+                    'stock' => $product->stock,
+                    'company_name' => $product->company->company_name,
+                ];
+            }));
+        }
+
+        if($sort = $request->sort){
+            $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
+            $query->orderBy($sort, $direction);
+        }
+
+        // 通常のリクエストの場合はビューを返す
+        $companies = Company::all();
         return view('products.index', compact('products', 'companies'));
     }
 
