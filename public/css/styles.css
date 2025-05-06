@@ -2,3 +2,15 @@
     color: red;
     margin-left: 4px;
 }
+
+/* テーブルヘッダーのリンク */
+th a {
+    color: black !important; /* 文字色を黒に */
+    text-decoration: none; /* 下線を消す */
+}
+
+/* ホバー時のリンクの色と下線を追加 */
+th a:hover {
+    color: black; /* ホバー時も黒色 */
+    text-decoration: underline; /* 下線を追加 */
+}

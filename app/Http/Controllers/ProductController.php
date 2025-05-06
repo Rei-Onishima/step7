@@ -25,67 +25,72 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         \Log::info('Request data:', $request->all()); //リクエストデータをログに記録
-
+    
         $query = Product::query();  // 新しいクエリビルダーインスタンスを作成
-
+    
         // 検索ワードが入力されている場合、その条件をクエリに追加
         if ($request->filled('search')) {
             $query->where('product_name', 'like', '%' . $request->search . '%');
         }
-
+    
         // 会社IDが指定されている場合、その条件をクエリに追加
         if ($request->filled('company_id')) {
             $query->where('company_id', $request->company_id);
         }
-
+    
         // 価格範囲検索
         if ($request->filled('price_min')) {
-        $query->where('price', '>=', $request->price_min);
+            $query->where('price', '>=', $request->price_min);
         }
-
+    
         if ($request->filled('price_max')) {
-        $query->where('price', '<=', $request->price_max);
+            $query->where('price', '<=', $request->price_max);
         }
-
+    
         // 在庫数範囲検索
         if ($request->filled('stock_min')) {
-        $query->where('stock', '>=', $request->stock_min);
+            $query->where('stock', '>=', $request->stock_min);
         }
-
+    
         if ($request->filled('stock_max')) {
-        $query->where('stock', '<=', $request->stock_max);
+            $query->where('stock', '<=', $request->stock_max);
         }
-
-        // 関連する会社データも一緒に取得
-        $products = $query->with('company')->get();
-
+    
+        // JOIN句を使用して会社情報を取得
+        $query->join('companies', 'products.company_id', '=', 'companies.id')
+              ->select('products.*', 'companies.company_name'); // JOIN したカラムを指定
+    
+        // ソート処理
+        if ($sort = $request->sort) {
+            $direction = $request->direction == 'desc' ? 'desc' : 'asc';
+            $allowedSorts = ['id', 'product_name', 'price', 'stock', 'company_name']; // ソート許可カラム
+    
+            if (in_array($sort, $allowedSorts)) {
+                if ($sort === 'company_name') {
+                    // 会社名でのソート処理
+                    $query->orderBy('companies.company_name', $direction);
+                } else {
+                    // その他のカラムでのソート処理
+                    $query->orderBy($sort, $direction);
+                }
+            } else {
+                $query->orderBy('id', 'desc'); // デフォルトでidで降順
+            }
+        } else {
+            $query->orderBy('id', 'desc'); // ソートなしのときはidで降順
+        }
+    
+        $products = $query->get(); // クエリを実行して取得
+    
         \Log::info('Query SQL:', [$query->toSql()]); // クエリのSQLをログに記録
         \Log::info('Query bindings:', $query->getBindings()); // クエリのバインディングをログに記録
         \Log::info('Query result:', $products->toArray()); // クエリ結果をログに記録
-
-        if ($request->ajax()) {
-            // Ajax リクエストの場合は JSON レスポンスを返す
-            return response()->json($products->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'img_path' => asset($product->img_path),
-                    'product_name' => $product->product_name,
-                    'price' => $product->price,
-                    'stock' => $product->stock,
-                    'company_name' => $product->company->company_name,
-                ];
-            }));
-        }
-
-        if($sort = $request->sort){
-            $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
-            $query->orderBy($sort, $direction);
-        }
-
+    
         // 通常のリクエストの場合はビューを返す
         $companies = Company::all();
         return view('products.index', compact('products', 'companies'));
     }
+    
 
     /**
      * Show the form for creating a new resource.
