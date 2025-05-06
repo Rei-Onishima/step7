@@ -9,28 +9,48 @@
     
     <!-- 検索フォームのセクション -->
     <div class="search mt-5">
-        <form id="searchForm" action="{{ route('products.index') }}" method="GET" class="row g-3">
-            <!-- 商品名検索用の入力欄 -->
-            <div class="col-sm-12 col-md-3">
-                <input type="text" id="searchQuery" name="search" class="form-control" placeholder="検索キーワード" value="{{ request('search') }}">
+        <form id="searchForm" action="{{ route('products.index') }}" method="GET" class="container">
+            <!-- 1段目 -->
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <input type="text" id="searchQuery" name="search" class="form-control form-control-sm" placeholder="キーワード" value="{{ request('search') }}">
+                </div>
+                <div class="col-auto">
+                    <select id="companySelect" class="form-select form-select-sm" name="company_id">
+                        <option value="">メーカー名</option>
+                        @foreach($companies as $company)
+                            <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>{{ $company->company_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-
-            <!-- メーカー名検索用のセレクトボックス -->
-            <div class="col-sm-12 col-md-3">
-                <select id="companySelect" class="form-select" name="company_id">
-                    <option value="" disabled selected>メーカー名</option>
-                    @foreach($companies as $company)
-                        <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>{{ $company->company_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- 絞り込みボタン -->
-            <div class="col-sm-12 col-md-1">
-                <button class="btn btn-outline-secondary" type="submit">検索</button>
+    
+            <!-- 2段目 -->
+            <div class="row g-2 align-items-center mt-2">
+                <!-- 価格 -->
+                <div class="col-auto d-flex align-items-center">
+                    <label for="priceMin" class="form-label mb-0 me-1">価格</label>
+                    <input type="number" id="priceMin" name="price_min" class="form-control form-control-sm me-1" style="width: 80px;" value="{{ request('price_min') }}">
+                    <span class="me-1">〜</span>
+                    <input type="number" id="priceMax" name="price_max" class="form-control form-control-sm me-3" style="width: 80px;" value="{{ request('price_max') }}">
+                </div>
+    
+                <!-- 在庫数 -->
+                <div class="col-auto d-flex align-items-center">
+                    <label for="stockMin" class="form-label mb-0 me-1">在庫数</label>
+                    <input type="number" id="stockMin" name="stock_min" class="form-control form-control-sm me-1" style="width: 80px;" value="{{ request('stock_min') }}">
+                    <span class="me-1">〜</span>
+                    <input type="number" id="stockMax" name="stock_max" class="form-control form-control-sm me-3" style="width: 80px;" value="{{ request('stock_max') }}">
+                </div>
+    
+                <!-- 検索ボタン -->
+                <div class="col-auto">
+                    <button class="btn btn-outline-secondary btn-sm" type="submit">検索</button>
+                </div>
             </div>
         </form>
     </div>
+    
 
     <!-- 検索結果表示のセクション -->
     <div class="products mt-5">

@@ -5,6 +5,10 @@ $(document).ready(function() {
         event.preventDefault();  // フォームのデフォルトの送信動作をキャンセル
         const query = $('#searchQuery').val();  // ID属性がsearchQueryの値をqueryという変数に代入
         const companyId = $('#companySelect').val();
+        const priceMin = $('#priceMin').val();  // 最小価格
+        const priceMax = $('#priceMax').val();  // 最大価格
+        const stockMin = $('#stockMin').val();  // 最小在庫数
+        const stockMax = $('#stockMax').val();  // 最大在庫数
         const resultsBody = $('#resultsBody');
         resultsBody.html('<tr><td colspan="7">検索中...</td></tr>');
 
@@ -17,7 +21,12 @@ $(document).ready(function() {
             type: 'GET',  // HTTPメソッド（GETリクエスト）
             data: {
                 search: query, // ここでのプロパティ名：変数名
-                company_id: companyId
+                company_id: companyId,
+                company_id: companyId, // メーカー名
+                price_min: priceMin, // 最小価格
+                price_max: priceMax, // 最大価格
+                stock_min: stockMin, // 最小在庫数
+                stock_max: stockMax, // 最大在庫数
             },
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

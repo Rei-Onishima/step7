@@ -38,6 +38,24 @@ class ProductController extends Controller
             $query->where('company_id', $request->company_id);
         }
 
+        // 価格範囲検索
+        if ($request->filled('price_min')) {
+        $query->where('price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+        $query->where('price', '<=', $request->price_max);
+        }
+
+        // 在庫数範囲検索
+        if ($request->filled('stock_min')) {
+        $query->where('stock', '>=', $request->stock_min);
+        }
+
+        if ($request->filled('stock_max')) {
+        $query->where('stock', '<=', $request->stock_max);
+        }
+
         // 関連する会社データも一緒に取得
         $products = $query->with('company')->get();
 
