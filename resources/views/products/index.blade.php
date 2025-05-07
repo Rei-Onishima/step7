@@ -112,10 +112,10 @@
                     <td>{{ $product->company->company_name }}</td>
                     <td>
                         <a href="{{ route('products.show', $product) }}" class="btn btn-secondary btn-sm mx-1">詳細表示</a>
-                        <form method="POST" action="{{ route('products.destroy', $product) }}" class="d-inline delete-form">
+                        <form method="POST" action="{{ route('products.destroy', $product) }}" class="d-inline delete-form" data-id="{{ $product->id }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm mx-1">削除</button>
+                            <button type="button" class="btn btn-danger btn-sm mx-1 delete-btn">削除</button>
                         </form>
                     </td>
                 </tr>

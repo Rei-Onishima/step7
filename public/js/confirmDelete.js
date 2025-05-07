@@ -1,16 +1,26 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // すべての削除フォームを取得
-    const deleteForms = document.querySelectorAll('.delete-form');
+$(document).ready(function() {
+    $('.delete-btn').click(function() {
+        if (!confirm('本当に削除しますか？')) {
+            return;
+        }
 
-    deleteForms.forEach(function(form) {
-        // フォームの送信イベントを監視
-        form.addEventListener('submit', function(event) {
-            // 確認ダイアログを表示し、ユーザーの応答を取得
-            const confirmed = confirm('本当に削除しますか？');
+        var form = $(this).closest('.delete-form');
+        var productId = form.data('id');
+        var url = form.attr('action');
+        var token = $('meta[name="csrf-token"]').attr('content');
 
-            // ユーザーが「キャンセル」を選択した場合、フォーム送信をキャンセル
-            if (!confirmed) {
-                event.preventDefault();
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                _method: 'DELETE',
+                _token: token
+            },
+            success: function(response) {
+                form.closest('tr').remove();
+            },
+            error: function(xhr) {
+                alert('削除に失敗しました');
             }
         });
     });

@@ -211,15 +211,28 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         DB::beginTransaction();
-
+    
         try {
             $product->delete();
             DB::commit();
+    
+            //非同期リクエストならJSONを返す
+            if (request()->ajax()) {
+                return response()->json(['message' => __('messages.success_delete')]);
+            }
+    
+            // 通常の（同期）リクエストならリダイレクト
             return redirect('/products')->with('success', __('messages.success_delete'));
         } catch (\Exception $e) {
             DB::rollback();
             \Log::error('Error deleting product: ' . $e->getMessage());
+    
+            //エラー時もJSONを返す
+            if (request()->ajax()) {
+                return response()->json(['message' => __('messages.error_delete')], 500);
+            }
+    
             return back()->withErrors(['error' => __('messages.error_delete')]);
         }
-    }
+    }    
 }
