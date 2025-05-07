@@ -21,7 +21,6 @@ $(document).ready(function() {
             type: 'GET',  // HTTPメソッド（GETリクエスト）
             data: {
                 search: query, // ここでのプロパティ名：変数名
-                company_id: companyId,
                 company_id: companyId, // メーカー名
                 price_min: priceMin, // 最小価格
                 price_max: priceMax, // 最大価格

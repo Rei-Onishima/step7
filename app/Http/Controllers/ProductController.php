@@ -24,72 +24,69 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        \Log::info('Request data:', $request->all()); //リクエストデータをログに記録
+        \Log::info('Request data:', $request->all());
     
-        $query = Product::query();  // 新しいクエリビルダーインスタンスを作成
+        $query = Product::query();
     
-        // 検索ワードが入力されている場合、その条件をクエリに追加
         if ($request->filled('search')) {
-            $query->where('product_name', 'like', '%' . $request->search . '%');
+            $query->where('products.product_name', 'like', '%' . $request->search . '%');
         }
     
-        // 会社IDが指定されている場合、その条件をクエリに追加
         if ($request->filled('company_id')) {
-            $query->where('company_id', $request->company_id);
+            $query->where('products.company_id', $request->company_id);
         }
     
-        // 価格範囲検索
         if ($request->filled('price_min')) {
-            $query->where('price', '>=', $request->price_min);
+            $query->where('products.price', '>=', $request->price_min);
         }
     
         if ($request->filled('price_max')) {
-            $query->where('price', '<=', $request->price_max);
+            $query->where('products.price', '<=', $request->price_max);
         }
     
-        // 在庫数範囲検索
         if ($request->filled('stock_min')) {
-            $query->where('stock', '>=', $request->stock_min);
+            $query->where('products.stock', '>=', $request->stock_min);
         }
     
         if ($request->filled('stock_max')) {
-            $query->where('stock', '<=', $request->stock_max);
+            $query->where('products.stock', '<=', $request->stock_max);
         }
     
-        // JOIN句を使用して会社情報を取得
         $query->join('companies', 'products.company_id', '=', 'companies.id')
-              ->select('products.*', 'companies.company_name'); // JOIN したカラムを指定
+              ->select('products.*', 'companies.company_name');
     
-        // ソート処理
         if ($sort = $request->sort) {
             $direction = $request->direction == 'desc' ? 'desc' : 'asc';
-            $allowedSorts = ['id', 'product_name', 'price', 'stock', 'company_name']; // ソート許可カラム
+            $allowedSorts = ['id', 'product_name', 'price', 'stock', 'company_name'];
     
             if (in_array($sort, $allowedSorts)) {
                 if ($sort === 'company_name') {
-                    // 会社名でのソート処理
                     $query->orderBy('companies.company_name', $direction);
                 } else {
-                    // その他のカラムでのソート処理
-                    $query->orderBy($sort, $direction);
+                    $query->orderBy('products.' . $sort, $direction);
                 }
             } else {
-                $query->orderBy('id', 'desc'); // デフォルトでidで降順
+                $query->orderBy('products.id', 'desc');
             }
         } else {
-            $query->orderBy('id', 'desc'); // ソートなしのときはidで降順
+            $query->orderBy('products.id', 'desc');
         }
     
-        $products = $query->get(); // クエリを実行して取得
+        $products = $query->get();
     
-        \Log::info('Query SQL:', [$query->toSql()]); // クエリのSQLをログに記録
-        \Log::info('Query bindings:', $query->getBindings()); // クエリのバインディングをログに記録
-        \Log::info('Query result:', $products->toArray()); // クエリ結果をログに記録
+        \Log::info('Query SQL:', [$query->toSql()]);
+        \Log::info('Query bindings:', $query->getBindings());
+        \Log::info('Query result:', $products->toArray());
     
-        // 通常のリクエストの場合はビューを返す
-        $companies = Company::all();
-        return view('products.index', compact('products', 'companies'));
+        // 👇 ここで Ajax と通常リクエストを分ける
+        if ($request->ajax()) {
+            return response()->json($products);
+        } else {
+            $companies = Company::all();
+            return view('products.index', compact('products', 'companies'));
+        }
     }
+    
     
 
     /**
