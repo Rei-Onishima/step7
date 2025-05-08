@@ -73,12 +73,18 @@ class ProductController extends Controller
         }
     
         $products = $query->get();
+
+        //ここで img_path をフルURLに変換
+        $products->transform(function ($product) {
+            $product->img_path = asset($product->img_path);
+            return $product;
+        });
     
         \Log::info('Query SQL:', [$query->toSql()]);
         \Log::info('Query bindings:', $query->getBindings());
         \Log::info('Query result:', $products->toArray());
     
-        // 👇 ここで Ajax と通常リクエストを分ける
+        //ここで Ajax と通常リクエストを分ける
         if ($request->ajax()) {
             return response()->json($products);
         } else {
