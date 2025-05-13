@@ -1,54 +1,67 @@
-//　ドキュメントが読み込まれたときに実行
-$(document).ready(function() {
-    // フォームが送信されたときに実行
-    $('#searchForm').on('submit', function(event) {
-        event.preventDefault();  // フォームのデフォルトの送信動作をキャンセル
-        const query = $('#searchQuery').val();  // ID属性がsearchQueryの値をqueryという変数に代入
-        const companyId = $('#companySelect').val();
-        const priceMin = $('#priceMin').val();  // 最小価格
-        const priceMax = $('#priceMax').val();  // 最大価格
-        const stockMin = $('#stockMin').val();  // 最小在庫数
-        const stockMax = $('#stockMax').val();  // 最大在庫数
-        const resultsBody = $('#resultsBody');
-        resultsBody.html('<tr><td colspan="7">検索中...</td></tr>');
+let currentSort = 'id';        // 初期ソートカラム
+let currentDirection = 'desc'; // 初期は降順
 
-        console.log('Search Query:', query);  // デバッグ用
-        console.log('Company ID:', companyId);  // デバッグ用
-
-        // Ajaxリクエストを送信
-        $.ajax({
-            url: '/step7/public/products',  // リクエストを送信するURL
-            type: 'GET',  // HTTPメソッド（GETリクエスト）
-            data: {
-                search: query, // ここでのプロパティ名：変数名
-                company_id: companyId, // メーカー名
-                price_min: priceMin, // 最小価格
-                price_max: priceMax, // 最大価格
-                stock_min: stockMin, // 最小在庫数
-                stock_max: stockMax, // 最大在庫数
-            },
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            dataType: 'json',  // サーバーからのレスポンスがJSON形式であることを指定
-            success: function(data) {  // successコールバック関数の引数名がresponseでもdataでも動作は基本的に同じ
-                // リクエストが成功したときの処理
-                console.log('Success:', data);  // デバッグ用
-                displayResults(data);
-            },
-            error: function(xhr, status, error) {
-                // エラーが発生したときの処理
-                resultsBody.html('<tr><td colspan="7">検索エラー</td></tr>');
-                console.error('Error:', error);
-                console.error('XHR:', xhr);  // デバッグ用
-                console.error('Status:', status);  // デバッグ用
-            }
-        });
+$(document).ready(function () {
+    // 検索フォーム送信
+    $('#searchForm').on('submit', function (event) {
+        event.preventDefault();
+        fetchProducts();
     });
 
+    // ソートリンククリック
+    $(document).on('click', '.sort-link', function (e) {
+        e.preventDefault();
+        const selectedSort = $(this).data('sort');
+
+        if (currentSort === selectedSort) {
+            currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort = selectedSort;
+            currentDirection = 'asc';
+        }
+
+        fetchProducts();
+    });
+
+    // Ajaxで検索＋ソート
+    function fetchProducts() {
+        const query = $('#searchQuery').val();
+        const companyId = $('#companySelect').val();
+        const priceMin = $('#priceMin').val();
+        const priceMax = $('#priceMax').val();
+        const stockMin = $('#stockMin').val();
+        const stockMax = $('#stockMax').val();
+
+        //$('#resultsBody').html('<tr><td colspan="7">読み込み中...</td></tr>');
+
+        $.ajax({
+            url: '/step7/public/products',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                search: query,
+                company_id: companyId,
+                price_min: priceMin,
+                price_max: priceMax,
+                stock_min: stockMin,
+                stock_max: stockMax,
+                sort: currentSort,
+                direction: currentDirection
+            },
+            success: function (data) {
+                displayResults(data);
+            },
+            error: function (xhr, status, error) {
+                $('#resultsBody').html('<tr><td colspan="7">読み込みエラー</td></tr>');
+                console.error('エラー:', error);
+            }
+        });
+    }
+
+    // 結果表示
     function displayResults(results) {
         const resultsBody = $('#resultsBody');
-        resultsBody.empty();  // 既存のテーブルの内容をクリア
+        resultsBody.empty();
 
         if (results.length === 0) {
             resultsBody.html('<tr><td colspan="7">結果が見つかりませんでした。</td></tr>');
@@ -56,7 +69,7 @@ $(document).ready(function() {
         }
 
         results.forEach(result => {
-            const tr = $('<tr></tr>'); // 新しいテーブルの行を作成
+            const tr = $('<tr></tr>');
             tr.html(`
                 <td>${result.id}</td>
                 <td><img src="${result.img_path}" alt="商品画像" width="100"></td>

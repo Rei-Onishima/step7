@@ -59,9 +59,7 @@
                 <tr>
                     <!-- ID -->
                     <th>
-                        <a href="{{ route('products.index', array_merge(request()->query(), ['sort' => 'id', 'direction' => request('sort') === 'id' && request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
-                            ID
-                        </a>
+                        <a href="#" class="sort-link" data-sort="id">ID</a>
                     </th>
             
                     <!-- 商品画像 (ソートなし) -->
@@ -69,30 +67,22 @@
             
                     <!-- 商品名 -->
                     <th>
-                        <a href="{{ route('products.index', array_merge(request()->query(), ['sort' => 'product_name', 'direction' => request('sort') === 'product_name' && request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
-                            商品名
-                        </a>
+                        <a href="#" class="sort-link" data-sort="product_name">商品名</a>
                     </th>
             
                     <!-- 価格 -->
                     <th>
-                        <a href="{{ route('products.index', array_merge(request()->query(), ['sort' => 'price', 'direction' => request('sort') === 'price' && request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
-                            価格
-                        </a>
+                        <a href="#" class="sort-link" data-sort="price">価格</a>
                     </th>
             
                     <!-- 在庫数 -->
                     <th>
-                        <a href="{{ route('products.index', array_merge(request()->query(), ['sort' => 'stock', 'direction' => request('sort') === 'stock' && request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
-                            在庫数
-                        </a>
+                        <a href="#" class="sort-link" data-sort="stock">在庫数</a>
                     </th>
             
                     <!-- メーカー名 -->
                     <th>
-                        <a href="{{ route('products.index', array_merge(request()->query(), ['sort' => 'company_name', 'direction' => request('sort') === 'company_name' && request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
-                            メーカー名
-                        </a>
+                        <a href="#" class="sort-link" data-sort="company_name">メーカー名</a>
                     </th>
             
                     <!-- その他 (ソートなし) -->
